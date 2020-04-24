@@ -1,5 +1,4 @@
-﻿/*@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,400i,500');*/
-* {
+﻿* {
     margin: 0;
     padding: 0;
     border: 0;
@@ -14,8 +13,6 @@ body {
     font-family: 'Roboto';
     font-size: 16px;
 }
-
-/* Toggle Styles */
 
 #viewport {
     padding-left: 300px;
@@ -36,12 +33,11 @@ body {
     /*  background: #000;*/
 }
 
-/* Sidebar Styles */
 
 .headerlogo {
     padding-top: 30px;
-    width: 150px;
-    height: 150px;
+    width: 100px;
+    height: 100px;
 }
 
 #sidebar {
