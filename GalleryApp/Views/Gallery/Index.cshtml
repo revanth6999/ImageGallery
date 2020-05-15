@@ -1,0 +1,232 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-body">
+    <form id="searchbox">
+        <input ng-keyup="search()" id="searchinput" ng-model="query" type="text" placeholder="Search" />
+    </form>
+    <form id="uploadbox" action="" ng-show="uploadShow">
+        <input id="fileinput" type="file" name="File" multiple ng-model="files" /> <br /><br />
+        <label style="color: #eee;" for="userinput">Enter username</label>
+        <input type="text" id="userinput" required ng-model="username"/> <br /><br />
+        <input id="btUpload" ng-click="uploadImage()" type="button" value="UPLOAD" />
+        <span ng-click="closeUpload()" class="arrow">&times;</span>
+    </form>
+    <div id="gallery-container-id" class="container-gallery">
+        <div ng-show="sorryMsgShow">
+            <img style="padding-left: 50%; transform: translate(-50%, 0%); -ms-transform: translate(-50%, 0%);"
+                 src="~/Images/sorry.png" />
+        </div>
+        <thumbnail></thumbnail>
+    </div>
+    <div id="flagBody"></div>
+</div>
+<div id="myModal" class="modal" ng-show="modalShow">
+    <span ng-click="closeImage()" class="close">&times;</span>
+    <div class="modal-content">
+        <img id="idmodalcontent" class="modal-content" src="{{modalFilepath}}">
+        <img ng-click="deleteImage()" id="deleteicon" src="~/Images/delete.png" />
+    </div>
+    <div id="caption">{{modalText}}</div>
+</div>
+<script type="text/javascript">
+
+    var app = angular.module("galleryApp", []);
+    app.directive("thumbnail", function() {
+        return {
+            restrict: "E",
+            template: "<div id='th-{{image.Id}}' class='thumbnail' ng-click='openImage($index)' ng-repeat='image in images'>\
+                            <div class='image-overlay'>\
+                                <div class='overlay'></div>\
+                                <img class='fs-logo' src='/Images/fs.png' />\
+                                <img id='tn-image{{image.Id}}' class='tn-image' src='{{image.Filepath}}'/>\
+                            </div>\
+                            <p id='tn-text{{image.Id}}' class='tn-text'>{{image.Filename}}</p>\
+                            <p class='tn-user'>- {{image.Username}}</p>\
+                        </div>"
+        };
+    });
+    app.controller('galleryCtrl', function($scope, $http) {
+
+        $scope.modalShow = false
+        $scope.uploadShow = false
+        $scope.sorryMsgShow = false
+        $scope.id = -1
+
+        $scope.start = function () {
+            $scope.sorryMsgShow = false
+            $scope.query = ""
+            $http({
+                method: "GET",
+                url: "https://localhost:44363/api/images"
+            }).then(function mySuccess(response) {
+                $scope.images = response.data
+            }, function myError(response) {
+                alert("Failed to load the images!")
+            })
+        }
+
+        $scope.start()
+
+        $scope.openImage = function(index) {
+            $scope.modalFilepath = $scope.images[index].Filepath
+            $scope.modalText = $scope.images[index].Filename
+            $scope.modalShow = true
+            $scope.id = $scope.images[index].Id
+        }
+
+        $scope.deleteImage = function(index) {
+            if (!confirm("The image will be deleted permanently")) {
+                return;
+            }
+            $http({
+                method: "DELETE",
+                url: "https://localhost:44363/api/delete/" + $scope.id
+            }).then(function mySuccess(response) {
+                displayFlag('g', "Succesfully deleted the image!")
+                $scope.closeImage()
+                $scope.start()
+            }, function myError(response) {
+                displayFlag('r', "Delete failed!")
+                $scope.closeImage()
+
+            })
+        }
+
+        $scope.search = function() {
+            if ($scope.query.length > 0) {
+                $http({
+                    method: "GET",
+                    url: "https://localhost:44363/api/search/" + $scope.query
+                }).then(function mySuccess(response) {
+                    $scope.images = response.data
+                    if (response.data.length == 0)
+                        $scope.sorryMsgShow = true
+                    else
+                        $scope.sorryMsgShow = false
+                }, function myError(response) {
+                    alert("Failed to search the images!")
+                })
+            } else {
+                $scope.start()
+            }
+        }
+
+        $scope.checkKey = function (evt) {
+            evt = evt || window.event;
+            if (evt.keyCode == 27) {
+                $scope.closeImage();
+            }
+        }
+
+        $scope.closeImage = function() {
+            $scope.modalShow = false
+        }
+
+        $scope.showUpload = function() {
+            $scope.uploadShow = true
+        }
+
+        $scope.closeUpload = function () {
+            $scope.clearUploadForm()
+            $scope.uploadShow = false
+        }
+
+        $scope.clearUploadForm = function () {
+            $scope.username = ""
+            let fileinput = document.getElementById("fileinput")
+            fileinput.value = ""
+        }
+
+        $scope.uploadImage = function() {
+            var fd1 = new FormData($("#uploadbox")[0]);
+            $.ajax({
+            type: "POST",
+            url: 'https://localhost:44363/api/fileupload',
+            enctype: 'multipart/form-data',
+            contentType: false,
+            processData: false,
+            cache: false,
+            data: fd1,
+            success: function (data, textStatus, xhr) {
+                if (data.IsError) {
+                    displayFlag('r', data.ErrorMessage);
+                    $scope.clearUploadForm();
+                    return;
+                }
+                var fd2 = new FormData();
+                fd2.append("Filename", data.Filename)
+                fd2.append("Filepath", data.Filepath)
+                fd2.append("Extension", data.Extension)
+                fd2.append("Filesize", data.Filesize)
+                fd2.append("Datetime", data.Datetime)
+                fd2.append("Username", document.getElementById("userinput").value)
+                var fn = data.Filename
+
+                $.ajax({
+                    type: "POST",
+                    url: 'https://localhost:44363/api/upload',
+                    enctype: 'multipart/form-data',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: fd2,
+                    success: function (data, textStatus, xhr) {
+                        displayFlag('g', "Uploaded the file '" + fn + "'")
+                        $scope.clearUploadForm()
+                        $scope.start()
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        displayFlag('r', "Could not upload the file '" + fn + "'")
+                    }
+                });
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(textStatus + ': ' + errorThrown)
+            }
+        });
+        }
+    });
+    
+    function displayFlag(c, msg) {
+        var flag = document.getElementById("flagBody")
+        flag.style.display = "block";
+        if (c == 'r') {
+            flag.style.backgroundColor = "#ff3b3b"
+        }
+        else if (c == 'g') {
+            flag.style.backgroundColor = "#53bd51"
+        }
+        flag.innerHTML = msg;
+        setTimeout(hideFlag, 4000);
+    }
+
+    function hideFlag() {
+        document.getElementById("flagBody").style.display = "none"
+    }
+
+</script>
+
+<!--
+<div id="th-0" class="thumbnail">
+<div class="image-overlay">
+    <div class="overlay"></div>
+    <img class="fs-logo" src="~/Images/fs.png" />
+    <img id="tn-image0" class="tn-image" src="~/Images/blackpanther.jpg" />
+</div>
+<p id="tn-text0" class="tn-text">Black Panther</p>
+<p class="tn-user">- Revanth</p>
+</div>
+-->
+@*<div id="th-{{image.Id}}" class="thumbnail" ng-repeat="image in images">
+    <div class="image-overlay">
+        <div class="overlay"></div>
+        <img class="fs-logo" src="~/Images/fs.png" />
+        <img id="tn-image{{image.Id}}" class="tn-image" src="{{image.Filepath|extract}}"/>
+    </div>
+    <p id="tn-text{{image.Id}}" class="tn-text">{{image.Filename}}</p>
+    <p class="tn-user">- {{image.Username}}</p>
+</div>*@

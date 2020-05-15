@@ -6,9 +6,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace ImageAPI.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ImagesController : ApiController
     {
         private ProjectEntities db = new ProjectEntities();
@@ -69,7 +71,7 @@ namespace ImageAPI.Controllers
                 response.Extension = file.ContentType;
                 response.Datetime = DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString();
                 response.Filesize = file.ContentLength.ToString();
-                response.Filepath = filepath + file.FileName;
+                response.Filepath = "https://localhost:44363/Uploads/" + file.FileName;
                 response.Filename = file.FileName.Split('.')[0];
                 return Request.CreateResponse(HttpStatusCode.Created, response);
             }
@@ -117,6 +119,9 @@ namespace ImageAPI.Controllers
             {
                 using (ProjectEntities entities = new ProjectEntities())
                 {
+                    string[] filepath = entities.Images.SingleOrDefault(i => i.Id == id).Filepath.Split('\\');
+                    String filename = filepath[filepath.Length - 1];
+                    File.Delete(System.Web.Hosting.HostingEnvironment.MapPath("~/Uploads/" + filename));
                     Image image = entities.Images.Find(id);
                     if (image == null)
                     {

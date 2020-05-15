@@ -12,6 +12,7 @@ body {
     overflow-x: hidden;
     font-family: 'Roboto';
     font-size: 16px;
+    background-color: #f5fafc;
 }
 
 #viewport {
@@ -24,8 +25,6 @@ body {
     margin-top: 0px;
 }
 
-
-
 #content {
     width: 100%;
     position: relative;
@@ -36,8 +35,8 @@ body {
 
 .headerlogo {
     padding-top: 30px;
-    width: 100px;
-    height: 100px;
+    width: 130px;
+    height: 130px;
 }
 
 #sidebar {
@@ -90,13 +89,16 @@ body {
     font-size: 14px;
 }
 
-#sidebar .nav a:hover {
-    background: none;
-    color: #fff;
-}
+    #sidebar .nav a:hover {
+        background: none;
+        color: #65e1dc;
+    }
 
 #sidebar .nav li:hover {
     background: #48545A;
+    color: #65e1dc;
+    font-size: 2em;
+    border-bottom: 3px solid #65e1dc;
 }
 
 #sidebar .nav a i {
@@ -111,6 +113,7 @@ body {
 .thumbnail {
     border: 1px solid #ddd; 
     border-radius: 4px;
+    background-color: #ffffff;
     padding: 5px;
     margin: 2%;
     width: 270px; 
@@ -228,9 +231,8 @@ body {
 }
 
 .modal {
-    display: none;
     position: fixed; 
-    z-index: 100; 
+    z-index: 250; 
     padding-top: 100px; 
     left: 0;
     top: 0;
@@ -292,7 +294,6 @@ body {
     -ms-transform: translate(-8%, -10%);
     transition: all 0.5s ease;
     border-radius: 5px;
-    display: none;
     padding: 10px;
     padding-top: 20px;
     padding-left: 35px;
@@ -363,8 +364,8 @@ body {
     color: #fff;
     margin-right: 10px;
     margin-bottom: 10px;
-    background-color: #ff3b3b;
     display: none;
+    background-color: #ff3b3b;
     border-radius: 8px;
     position: fixed;
     right: 0%;

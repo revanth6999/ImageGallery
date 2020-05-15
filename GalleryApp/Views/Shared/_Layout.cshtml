@@ -7,50 +7,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="~/Content/Site.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="~/Scripts/angular.min.js"></script>
 </head>
-<body>
+<body ng-app="galleryApp"  ng-controller="galleryCtrl">
     <div id="viewport">
-        <!-- Sidebar -->
         <div id="sidebar">
             <header>
-                <img href="/Home" class="headerlogo" src="~/Images/gallery.png" />
+                <img ng-click="start()" href="/Gallery/Index" class="headerlogo" src="~/Images/gallery.png" />
             </header>
             <ul class="nav">
-                <li>
-                    <a href="/Home">
+                <li ng-click="start()">
+                    <a href="/Gallery/Index">
                         Home
                     </a>
                 </li>
-                <li onclick="uploadopen()">
+                <li ng-click="showUpload()">
                     <a>
                         UPLOAD
                     </a>
                 </li>
-                @*<li>
-                    <a href="#">
-                        Settings
-                    </a>
-                </li>*@
             </ul>
         </div>
 
         <div id="content">
             @RenderBody()
         </div>
-        <div id="myModal" class="modal">
-            <span onclick="modalclose()" class="close">&times;</span>
-            <div class="modal-content">
-                <img id="idmodalcontent" class="modal-content" src="~/Images/spiderman.jpg">
-                <img onclick="deleteImage()" id="deleteicon" src="~/Images/delete.png" />
-            </div>
-            <div id="caption">Image</div>
-        </div>
-
     </div>
     @Scripts.Render("~/bundles/jquery")
-    @*@Scripts.Render("~/bundles/bootstrap")*@
-    @RenderSection("scripts", required: false)
-    
+    @RenderSection("scripts", required: false)    
 </body>
 </html>
 
