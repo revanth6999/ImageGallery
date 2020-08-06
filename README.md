@@ -16,5 +16,3 @@ Functionalities:
 ![](snap2.PNG)
 
 ![](snap3.PNG)
-
-![](snap4.PNG)
